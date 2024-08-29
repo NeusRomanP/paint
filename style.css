@@ -57,10 +57,16 @@ aside button {
   background-repeat: no-repeat;
   background-size: contain;
   background-color: #AAA;
+  border: 1.5px solid #eee;
+  border-right-color: #000;
+  border-bottom-color: #000;
 }
 
 aside button.active {
   background-color: #CCC;
+  border-color: #000;
+  border-right-color: #eee;
+  border-bottom-color: #eee;
 }
 
 #draw {
