@@ -1,0 +1,106 @@
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background-color: #333;
+  box-sizing: border-box;
+}
+
+#container {
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  max-width: 600px;
+  aspect-ratio: 16/9;
+  background-color: #111;
+  margin: auto;
+}
+
+nav ul {
+  list-style-type: none;
+  display: flex;
+  justify-content: flex-start;
+  background-color: #AAA;
+  padding: 2px;
+  margin: 0;
+}
+
+nav ul li {
+  padding: 4px 8px;
+}
+
+nav ul li:hover {
+  background-color: #CCC;
+  box-shadow: -1px -1px black inset;
+}
+
+.main-container {
+  display: flex;
+  flex: 1;
+  background-color: black;
+}
+
+aside {
+  background-color: #AAA;
+}
+
+aside div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  width: 50px;
+}
+
+aside button {
+  width: 24px;
+  height: 24px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-color: #AAA;
+}
+
+aside button.active {
+  background-color: #CCC;
+}
+
+#draw {
+  background-image: url(./icons/draw.png);
+}
+
+#erase {
+  background-image: url(./icons/erase.png);
+}
+
+#rectangle {
+  background-image: url(./icons/rectangle.png);
+}
+
+#ellipse {
+  background-image: url(./icons/ellipse.png);
+}
+
+#picker {
+  background-image: url(./icons/picker.png);
+}
+
+#trash {
+  background-image: url(./icons/trash.png);
+}
+
+main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+canvas {
+  width: 90%;
+  height: 100%;
+  background-color: white;
+}
+
+
+
+footer{
+  background-color: #AAA;
+}
