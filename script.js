@@ -1,4 +1,5 @@
 const $ = selector => document.querySelector(selector);
+const $$ = selector => document.querySelectorAll(selector);
 
 const TOOLS = {
   DRAW: 'draw',
@@ -8,6 +9,8 @@ const TOOLS = {
   PICKER: 'picker'
 };
 
+const colors = [];
+
 const canvas = $('canvas');
 const colorPicker = $('#color');
 const ctx = canvas.getContext('2d')
@@ -16,10 +19,15 @@ const drawButton = $('#draw');
 const eraseButton = $('#erase');
 const rectangleButton = $('#rectangle');
 const ellipseButton = $('#ellipse');
+const pickerButton = $('#picker');
 const trashButton = $('#trash');
+
+const customColorsContainer = $('.custom-colors');
+const customColors = $$('.custom-colors li');
 
 let isDrawing = false;
 let isShiftPressed = false;
+let pickingColor = false;
 
 let tool = TOOLS.DRAW;
 let startX, startY;
@@ -37,14 +45,22 @@ canvas.addEventListener('mouseleave', stopDrawing);
 
 colorPicker.addEventListener('change', changeColor);
 
-drawButton.addEventListener('click', () => setTool(TOOLS.DRAW));
-eraseButton.addEventListener('click', () => setTool(TOOLS.ERASE));
-rectangleButton.addEventListener('click', () => setTool(TOOLS.RECTANGLE));
-ellipseButton.addEventListener('click', () => setTool(TOOLS.ELLIPSE));
+drawButton.addEventListener('click', (e) => setTool(e, TOOLS.DRAW));
+eraseButton.addEventListener('click', (e) => setTool(e, TOOLS.ERASE));
+rectangleButton.addEventListener('click', (e) => setTool(e, TOOLS.RECTANGLE));
+ellipseButton.addEventListener('click', (e) => setTool(e, TOOLS.ELLIPSE));
+pickerButton.addEventListener('click', (e) => setTool(e, TOOLS.PICKER));
 trashButton.addEventListener('click', clearCanvas);
 
 document.addEventListener('keydown', handleShiftKeydown);
 document.addEventListener('keyup', handleShiftKeyup);
+
+Array.from(customColors).forEach((customColor) => {
+  customColor.addEventListener('click', (e) => {
+    colorPicker.value = e.target.getAttribute('color');
+    ctx.strokeStyle = e.target.getAttribute('color');
+  })
+})
 
 
 function initializeCanvas() {
@@ -71,8 +87,9 @@ function handleShiftKeyup({ key }) {
   if (key === 'Shift') isShiftPressed = false;
 }
 
-function setTool (newTool) {
+function setTool (e, newTool) {
   tool = newTool;
+  pickingColor = false;
   $('button.active')?.classList.remove('active');
 
   if (tool === TOOLS.DRAW) {
@@ -106,15 +123,41 @@ function setTool (newTool) {
     ctx.lineWidth = drawLW;
     return
   }
+
+  if (tool === TOOLS.PICKER) {
+    pickerButton.classList.add('active');
+    canvas.style.cursor = 'crosshair';
+    pickingColor = true
+    return
+  }
 }
 
-function changeColor () {
+canvas.addEventListener('click', (e) => {
+  if (pickingColor && colors.length < customColors.length) {
+    const color = pickColor(e);
+    addCustomColor(color);
+  }
+})
+
+function addCustomColor(color) {
+  colors.push(color);
+  updateCustomColors();
+}
+
+function updateCustomColors() {
+  colors.forEach((color, index) => {
+    customColors[index].style.backgroundColor = color;
+    customColors[index].setAttribute('color', color);
+  })
+}
+
+function changeColor() {
   const { value } = colorPicker;
   console.log(value)
   ctx.strokeStyle = value;
 }
 
-function startDrawing (e) {
+function startDrawing(e) {
   isDrawing = true;
 
   const { offsetX, offsetY } = e;
@@ -189,6 +232,23 @@ function draw (e) {
     return
   }
   
+}
+
+function rgbToHex(r, g, b) {
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
+}
+
+function pickColor(e) {
+  const { offsetX, offsetY } = e;
+
+  const imageData = ctx.getImageData(offsetX, offsetY, 1, 1);
+  const [r, g, b, a] = imageData.data;
+
+  if (a === 0) {
+      return '#ffffff';
+  }
+
+  return hexColor = rgbToHex(r, g, b);
 }
 
 function stopDrawing () {
