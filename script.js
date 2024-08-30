@@ -15,6 +15,7 @@ const ctx = canvas.getContext('2d')
 const drawButton = $('#draw');
 const eraseButton = $('#erase');
 const rectangleButton = $('#rectangle');
+const ellipseButton = $('#ellipse');
 const trashButton = $('#trash');
 
 let isDrawing = false;
@@ -39,6 +40,7 @@ colorPicker.addEventListener('change', changeColor);
 drawButton.addEventListener('click', () => setTool(TOOLS.DRAW));
 eraseButton.addEventListener('click', () => setTool(TOOLS.ERASE));
 rectangleButton.addEventListener('click', () => setTool(TOOLS.RECTANGLE));
+ellipseButton.addEventListener('click', () => setTool(TOOLS.ELLIPSE));
 trashButton.addEventListener('click', clearCanvas);
 
 document.addEventListener('keydown', handleShiftKeydown);
@@ -91,6 +93,14 @@ function setTool (newTool) {
 
   if (tool === TOOLS.RECTANGLE) {
     rectangleButton.classList.add('active');
+    canvas.style.cursor = 'crosshair';
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.lineWidth = drawLW;
+    return
+  }
+
+  if (tool === TOOLS.ELLIPSE) {
+    ellipseButton.classList.add('active');
     canvas.style.cursor = 'crosshair';
     ctx.globalCompositeOperation = 'source-over';
     ctx.lineWidth = drawLW;
@@ -150,6 +160,31 @@ function draw (e) {
 
     ctx.beginPath();
     ctx.rect(startX, startY, width, height);
+    ctx.stroke();
+    return
+  }
+
+  if (tool === TOOLS.ELLIPSE) {
+    ctx.putImageData(imageData, 0, 0);
+
+    const { offsetX, offsetY } = e;
+
+    let radiusX = Math.abs(offsetX - startX) / 2;
+    let radiusY = Math.abs(offsetY - startY) / 2;
+
+    let centerX = startX + (offsetX - startX) / 2;
+    let centerY = startY + (offsetY - startY) / 2;
+
+    if (isShiftPressed) {
+      const radius = Math.min(radiusX, radiusY);
+      radiusX = radiusY = radius;
+
+      centerX = startX + Math.sign(offsetX - startX) * radiusX;
+      centerY = startY + Math.sign(offsetY - startY) * radiusY;
+    }
+
+    ctx.beginPath();
+    ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
     ctx.stroke();
     return
   }
