@@ -19,15 +19,19 @@ let startX, startY;
 let lastX = 0;
 let lastY = 0;
 
-let lastOffsetWidth = null;
-let lastOffsetHeight = null;
-
 canvas.addEventListener('mousedown', startDrawing);
 canvas.addEventListener('mousemove', draw);
 canvas.addEventListener('mouseup', stopDrawing);
 canvas.addEventListener('mouseleave', stopDrawing);
 
 drawButton.addEventListener('click', setTool(TOOLS.DRAW));
+
+function initializeCanvas() {
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+}
+
+initializeCanvas();
 
 function setTool (newTool) {
   tool = newTool;
@@ -41,15 +45,6 @@ function startDrawing (e) {
 
   [startX, startY] = [offsetX, offsetY];
   [lastX, lastY] = [offsetX, offsetY];
-
-  if (lastOffsetWidth !== canvas.offsetWidth
-      || lastOffsetHeight !== canvas.offsetHeight) {
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
-  }
-
-  lastOffsetWidth = canvas.offsetWidth
-  lastOffsetHeight = canvas.offsetHeight;
 
   imageData = ctx.getImageData(
     0, 0, canvas.width, canvas.height
@@ -82,3 +77,10 @@ function stopDrawing () {
     isDrawing = false;
   }
 }
+
+window.addEventListener('resize', () => {
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  initializeCanvas();
+
+  ctx.putImageData(imageData, 0, 0);
+});
