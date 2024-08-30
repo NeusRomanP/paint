@@ -9,6 +9,7 @@ const TOOLS = {
 };
 
 const canvas = $('canvas');
+const colorPicker = $('#color');
 const ctx = canvas.getContext('2d')
 
 const drawButton = $('#draw');
@@ -24,6 +25,8 @@ canvas.addEventListener('mousemove', draw);
 canvas.addEventListener('mouseup', stopDrawing);
 canvas.addEventListener('mouseleave', stopDrawing);
 
+colorPicker.addEventListener('change', changeColor);
+
 drawButton.addEventListener('click', setTool(TOOLS.DRAW));
 
 function initializeCanvas() {
@@ -37,8 +40,13 @@ function setTool (newTool) {
   tool = newTool;
 }
 
+function changeColor () {
+  const { value } = colorPicker;
+  console.log(value)
+  ctx.strokeStyle = value;
+}
+
 function startDrawing (e) {
-  console.log('start')
   isDrawing = true;
 
   const { offsetX, offsetY } = e;
@@ -61,8 +69,6 @@ function draw (e) {
     ctx.moveTo(lastX, lastY);
     ctx.lineTo(offsetX, offsetY);
     ctx.stroke();
-
-    console.log(startX, startY, lastX, lastY);
 
     [lastX, lastY] = [offsetX, offsetY];
 

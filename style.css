@@ -109,4 +109,28 @@ canvas {
 
 footer{
   background-color: #AAA;
+  display: flex;
+  gap: 8px;
+  padding-block: 2px;
+}
+
+footer .color-picker {
+  display: flex;
+  align-items: center;
+}
+
+footer .custom-colors {
+  display: grid;
+  grid-template-columns: repeat(5, 20px);
+  gap: 2px;
+  list-style-type: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+footer .custom-colors li {
+  background-color: #CCC;
+  width: 100%;
+  aspect-ratio: 1;
+  box-shadow: -1px -1px black;
 }
