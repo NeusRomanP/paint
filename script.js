@@ -13,6 +13,7 @@ const colorPicker = $('#color');
 const ctx = canvas.getContext('2d')
 
 const drawButton = $('#draw');
+const trashButton = $('#trash');
 
 let isDrawing = false;
 let tool = TOOLS.DRAW;
@@ -28,10 +29,15 @@ canvas.addEventListener('mouseleave', stopDrawing);
 colorPicker.addEventListener('change', changeColor);
 
 drawButton.addEventListener('click', setTool(TOOLS.DRAW));
+trashButton.addEventListener('click', clearCanvas);
 
 function initializeCanvas() {
   canvas.width = canvas.offsetWidth;
   canvas.height = canvas.offsetHeight;
+}
+
+function clearCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
 }
 
 initializeCanvas();
