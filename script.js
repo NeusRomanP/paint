@@ -22,6 +22,8 @@ const ellipseButton = $('#ellipse');
 const pickerButton = $('#picker');
 const trashButton = $('#trash');
 
+const ccTrashButton = $('#custom-colors-trash');
+
 const saveButton = $('#save');
 
 const customColorsContainer = $('.custom-colors');
@@ -31,6 +33,9 @@ const dropdownMenuItems = $$('nav li.dropdown');
 let isDrawing = false;
 let isShiftPressed = false;
 let pickingColor = false;
+
+let selectedCustomColor = null;
+let selectedCustomColorIndex = -1;
 
 let tool = TOOLS.DRAW;
 let startX, startY;
@@ -59,6 +64,7 @@ rectangleButton.addEventListener('click', (e) => setTool(e, TOOLS.RECTANGLE));
 ellipseButton.addEventListener('click', (e) => setTool(e, TOOLS.ELLIPSE));
 pickerButton.addEventListener('click', (e) => setTool(e, TOOLS.PICKER));
 trashButton.addEventListener('click', clearCanvas);
+ccTrashButton.addEventListener('click', removeSelectedColor);
 
 saveButton.addEventListener('click', saveImage);
 
@@ -69,21 +75,21 @@ canvas.addEventListener('touchstart', (e) => {}, { passive: false })
 
 canvas.addEventListener('touchmove', (e) => {}, { passive: false })
 
-Array.from(customColors).forEach((customColor) => {
+Array.from(customColors).forEach((customColor, index) => {
   let touchHandled = false;
   customColor.addEventListener('click', (e) => {
     if (touchHandled) {
       e.preventDefault();
       return
     }
-    colorPicker.value = e.target.getAttribute('color');
-    ctx.strokeStyle = e.target.getAttribute('color');
+    selectedCustomColorIndex = index;
+    handleCustomColor(e);
   })
 
   customColor.addEventListener('touchstart', (e) => {
     touchHandled = true;
-    colorPicker.value = e.target.getAttribute('color');
-    ctx.strokeStyle = e.target.getAttribute('color');
+    selectedCustomColorIndex = index;
+    handleCustomColor(e);
   })
 
   customColor.addEventListener('touchend', (e) => {
@@ -101,6 +107,36 @@ Array.from(dropdownMenuItems).forEach((dropdownMenu) => {
     }
   })
 })
+
+function handleCustomColor(e) {
+  if (selectedCustomColorIndex < colors.length 
+      && selectedCustomColorIndex > -1) {
+    colorPicker.value = e.target.getAttribute('color');
+    ctx.strokeStyle = e.target.getAttribute('color');
+    selectedCustomColor = e.target;
+    changeColor();
+    e.target.classList.add('active');
+  }
+}
+
+function removeSelectedColor(e) {
+  if (selectedCustomColorIndex < colors.length 
+      && selectedCustomColorIndex > -1) {
+    colors.splice(selectedCustomColorIndex, 1);
+    updateCustomColors();
+  }
+}
+
+function clearCustomColors() {
+  if (selectedCustomColor) {
+    selectedCustomColor = null;
+    selectedCustomColorIndex = -1;
+  }
+  Array.from(customColors).forEach(customColor => {
+    customColor.classList.remove('active');
+    customColor.style.backgroundColor = 'transparent';
+  })
+}
 
 function initializeCanvas() {
   canvas.width = canvas.offsetWidth;
@@ -191,6 +227,7 @@ function addCustomColor(color) {
 }
 
 function updateCustomColors() {
+  clearCustomColors();
   colors.forEach((color, index) => {
     customColors[index].style.backgroundColor = color;
     customColors[index].setAttribute('color', color);
@@ -214,7 +251,6 @@ function getCoords(e) {
 
 function changeColor() {
   const { value } = colorPicker;
-  console.log('hola');
   ctx.strokeStyle = value;
 }
 

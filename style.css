@@ -113,7 +113,7 @@ aside button.active {
   background-image: url(./icons/picker.png);
 }
 
-#trash {
+.trash {
   background-image: url(./icons/trash.png);
 }
 
@@ -133,6 +133,7 @@ canvas {
 footer{
   background-color: #AAA;
   display: flex;
+  align-items: center;
   gap: 8px;
   padding-block: 2px;
 }
@@ -156,4 +157,20 @@ footer .custom-colors li {
   width: 100%;
   aspect-ratio: 1;
   box-shadow: -1px -1px black;
+}
+
+footer .custom-colors li.active {
+  box-shadow: 1px 1px white;
+}
+
+footer button.trash {
+  width: 24px;
+  height: 24px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-color: #AAA;
+  border: 1.5px solid #eee;
+  border-right-color: #000;
+  border-bottom-color: #000;
 }
