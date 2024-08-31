@@ -65,13 +65,9 @@ saveButton.addEventListener('click', saveImage);
 document.addEventListener('keydown', handleShiftKeydown);
 document.addEventListener('keyup', handleShiftKeyup);
 
-canvas.addEventListener('touchstart', (e) => {
-  e.preventDefault();
-}, { passive: false })
+canvas.addEventListener('touchstart', (e) => {}, { passive: false })
 
-canvas.addEventListener('touchmove', (e) => {
-  e.preventDefault();
-}, { passive: false })
+canvas.addEventListener('touchmove', (e) => {}, { passive: false })
 
 Array.from(customColors).forEach((customColor) => {
   let touchHandled = false;
@@ -105,75 +101,6 @@ Array.from(dropdownMenuItems).forEach((dropdownMenu) => {
     }
   })
 })
-
-async function saveImage() {
-
-  if (window.showSaveFilePicker) {
-    try {
-      const fileHandle = await window.showSaveFilePicker({
-        suggestedName: 'myImage',
-        types: [
-          {
-              description: 'PNG Image',
-              accept: { 'image/png': ['.png'] },
-          },
-          {
-              description: 'JPEG Image',
-              accept: { 'image/jpeg': ['.jpeg', '.jpg'] },
-          },
-          {
-              description: 'WEBP Image',
-              accept: { 'image/webp': ['.webp'] },
-          }
-        ],
-      });
-
-      const extension = fileHandle.name.split('.').pop().toLowerCase();
-      const mimeType = {
-        png: 'image/png',
-        jpeg: 'image/jpeg',
-        jpg: 'image/jpeg',
-        webp: 'image/webp',
-      }[extension] || 'image/png';
-
-      if (mimeType === 'image/jpeg') {
-        const tmpCanvas = document.createElement('canvas');
-        tmpCanvas.width = canvas.width;
-        tmpCanvas.height = canvas.height;
-        const tmpCtx = tmpCanvas.getContext('2d');
-
-        tmpCtx.fillStyle = 'white';
-        tmpCtx.fillRect(0, 0, tmpCanvas.width, tmpCanvas.height);
-
-        tmpCtx.drawImage(canvas, 0, 0);
-
-        const blob = await new Promise(resolve => tmpCanvas.toBlob(resolve, mimeType));
-        await guardarBlob(blob, fileHandle);
-      } else {
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, mimeType));
-        await guardarBlob(blob, fileHandle);
-      }
-    } catch (error) {
-        console.log('Something went wrong!')
-    }
-  } else {
-    const image = canvas.toDataURL('image/png');
-    const link = document.createElement('a');
-    link.href = image;
-    link.download = 'myImage.png';
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }
-  
-}
-
-async function guardarBlob(blob, fileHandle) {
-  const writableStream = await fileHandle.createWritable();
-  await writableStream.write(blob);
-  await writableStream.close();
-}
-
 
 function initializeCanvas() {
   canvas.width = canvas.offsetWidth;
@@ -287,6 +214,7 @@ function getCoords(e) {
 
 function changeColor() {
   const { value } = colorPicker;
+  console.log('hola');
   ctx.strokeStyle = value;
 }
 
@@ -399,6 +327,73 @@ window.addEventListener('resize', () => {
 
   ctx.putImageData(imageData, 0, 0);
 });
+
+async function saveImage() {
+  if (window.showSaveFilePicker) {
+    try {
+      const fileHandle = await window.showSaveFilePicker({
+        suggestedName: 'myImage',
+        types: [
+          {
+              description: 'PNG Image',
+              accept: { 'image/png': ['.png'] },
+          },
+          {
+              description: 'JPEG Image',
+              accept: { 'image/jpeg': ['.jpeg', '.jpg'] },
+          },
+          {
+              description: 'WEBP Image',
+              accept: { 'image/webp': ['.webp'] },
+          }
+        ],
+      });
+
+      const extension = fileHandle.name.split('.').pop().toLowerCase();
+      const mimeType = {
+        png: 'image/png',
+        jpeg: 'image/jpeg',
+        jpg: 'image/jpeg',
+        webp: 'image/webp',
+      }[extension] || 'image/png';
+
+      if (mimeType === 'image/jpeg') {
+        const tmpCanvas = document.createElement('canvas');
+        tmpCanvas.width = canvas.width;
+        tmpCanvas.height = canvas.height;
+        const tmpCtx = tmpCanvas.getContext('2d');
+
+        tmpCtx.fillStyle = 'white';
+        tmpCtx.fillRect(0, 0, tmpCanvas.width, tmpCanvas.height);
+
+        tmpCtx.drawImage(canvas, 0, 0);
+
+        const blob = await new Promise(resolve => tmpCanvas.toBlob(resolve, mimeType));
+        await guardarBlob(blob, fileHandle);
+      } else {
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, mimeType));
+        await guardarBlob(blob, fileHandle);
+      }
+    } catch (error) {
+        console.log('Something went wrong!')
+    }
+  } else {
+    const image = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.href = image;
+    link.download = 'myImage.png';
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+  
+}
+
+async function guardarBlob(blob, fileHandle) {
+  const writableStream = await fileHandle.createWritable();
+  await writableStream.write(blob);
+  await writableStream.close();
+}
 
 ctx.lineJoin = 'round';
 ctx.lineCap = 'round';
