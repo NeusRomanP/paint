@@ -65,6 +65,14 @@ saveButton.addEventListener('click', saveImage);
 document.addEventListener('keydown', handleShiftKeydown);
 document.addEventListener('keyup', handleShiftKeyup);
 
+canvas.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+}, { passive: false })
+
+canvas.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+}, { passive: false })
+
 Array.from(customColors).forEach((customColor) => {
   let touchHandled = false;
   customColor.addEventListener('click', (e) => {
