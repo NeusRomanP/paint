@@ -46,6 +46,11 @@ canvas.addEventListener('mousemove', draw);
 canvas.addEventListener('mouseup', stopDrawing);
 canvas.addEventListener('mouseleave', stopDrawing);
 
+canvas.addEventListener('touchstart', startDrawing);
+canvas.addEventListener('touchmove', draw);
+canvas.addEventListener('touchend', stopDrawing);
+canvas.addEventListener('touchleave', stopDrawing);
+
 colorPicker.addEventListener('change', changeColor);
 
 drawButton.addEventListener('click', (e) => setTool(e, TOOLS.DRAW));
@@ -61,9 +66,24 @@ document.addEventListener('keydown', handleShiftKeydown);
 document.addEventListener('keyup', handleShiftKeyup);
 
 Array.from(customColors).forEach((customColor) => {
+  let touchHandled = false;
   customColor.addEventListener('click', (e) => {
+    if (touchHandled) {
+      e.preventDefault();
+      return
+    }
     colorPicker.value = e.target.getAttribute('color');
     ctx.strokeStyle = e.target.getAttribute('color');
+  })
+
+  customColor.addEventListener('touchstart', (e) => {
+    touchHandled = true;
+    colorPicker.value = e.target.getAttribute('color');
+    ctx.strokeStyle = e.target.getAttribute('color');
+  })
+
+  customColor.addEventListener('touchend', (e) => {
+    touchHandled = false;
   })
 })
 
@@ -223,6 +243,13 @@ canvas.addEventListener('click', (e) => {
   }
 })
 
+canvas.addEventListener('touch', (e) => {
+  if (pickingColor && colors.length < customColors.length) {
+    const color = pickColor(e);
+    addCustomColor(color);
+  }
+})
+
 function addCustomColor(color) {
   colors.push(color);
   updateCustomColors();
@@ -235,19 +262,35 @@ function updateCustomColors() {
   })
 }
 
+function getCoords(e) {
+  if (e.touches) {
+      return {
+          offsetX: e.touches[0].clientX - canvas.getBoundingClientRect().left,
+          offsetY: e.touches[0].clientY - canvas.getBoundingClientRect().top
+      };
+  } else {
+      return {
+          offsetX: e.clientX - canvas.getBoundingClientRect().left,
+          offsetY: e.clientY - canvas.getBoundingClientRect().top
+      };
+  }
+}
+
+
 function changeColor() {
   const { value } = colorPicker;
-  console.log(value)
   ctx.strokeStyle = value;
 }
 
 function startDrawing(e) {
   isDrawing = true;
 
-  const { offsetX, offsetY } = e;
+  const { offsetX, offsetY } = getCoords(e);
 
-  [startX, startY] = [offsetX, offsetY];
-  [lastX, lastY] = [offsetX, offsetY];
+  startX = offsetX;
+  startY = offsetY;
+  lastX = offsetX;
+  lastY = offsetY;
 
   imageData = ctx.getImageData(
     0, 0, canvas.width, canvas.height
@@ -257,7 +300,7 @@ function startDrawing(e) {
 function draw (e) {
   if (!isDrawing) return;
 
-  const { offsetX, offsetY } = e;
+  const { offsetX, offsetY } = getCoords(e);
 
   if (tool === TOOLS.DRAW || tool === TOOLS.ERASE) {
     ctx.beginPath();
@@ -265,7 +308,8 @@ function draw (e) {
     ctx.lineTo(offsetX, offsetY);
     ctx.stroke();
 
-    [lastX, lastY] = [offsetX, offsetY];
+    lastX = offsetX;
+    lastY = offsetY;
 
     return
   }
@@ -294,7 +338,7 @@ function draw (e) {
   if (tool === TOOLS.ELLIPSE) {
     ctx.putImageData(imageData, 0, 0);
 
-    const { offsetX, offsetY } = e;
+    const { offsetX, offsetY } = getCoords(e);
 
     let radiusX = Math.abs(offsetX - startX) / 2;
     let radiusY = Math.abs(offsetY - startY) / 2;
@@ -323,7 +367,7 @@ function rgbToHex(r, g, b) {
 }
 
 function pickColor(e) {
-  const { offsetX, offsetY } = e;
+  const { offsetX, offsetY } = getCoords(e);
 
   const imageData = ctx.getImageData(offsetX, offsetY, 1, 1);
   const [r, g, b, a] = imageData.data;
@@ -337,7 +381,6 @@ function pickColor(e) {
 
 function stopDrawing () {
   if (isDrawing) {
-    console.log('stop')
     isDrawing = false;
   }
 }
