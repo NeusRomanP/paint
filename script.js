@@ -22,8 +22,11 @@ const ellipseButton = $('#ellipse');
 const pickerButton = $('#picker');
 const trashButton = $('#trash');
 
+const saveButton = $('#save');
+
 const customColorsContainer = $('.custom-colors');
 const customColors = $$('.custom-colors li');
+const dropdownMenuItems = $$('nav li.dropdown');
 
 let isDrawing = false;
 let isShiftPressed = false;
@@ -52,6 +55,8 @@ ellipseButton.addEventListener('click', (e) => setTool(e, TOOLS.ELLIPSE));
 pickerButton.addEventListener('click', (e) => setTool(e, TOOLS.PICKER));
 trashButton.addEventListener('click', clearCanvas);
 
+saveButton.addEventListener('click', saveImage);
+
 document.addEventListener('keydown', handleShiftKeydown);
 document.addEventListener('keyup', handleShiftKeyup);
 
@@ -61,6 +66,85 @@ Array.from(customColors).forEach((customColor) => {
     ctx.strokeStyle = e.target.getAttribute('color');
   })
 })
+
+Array.from(dropdownMenuItems).forEach((dropdownMenu) => {
+  dropdownMenu.addEventListener('click', () => {
+    dropdownMenu.querySelector('ul').classList.add('open');
+  })
+  document.addEventListener('click', (e) => {
+    if (!dropdownMenu.contains(e.target)) {
+      dropdownMenu.querySelector('ul').classList.remove('open');
+    }
+  })
+})
+
+async function saveImage() {
+
+  if (window.showSaveFilePicker) {
+    try {
+      const fileHandle = await window.showSaveFilePicker({
+        suggestedName: 'myImage',
+        types: [
+          {
+              description: 'PNG Image',
+              accept: { 'image/png': ['.png'] },
+          },
+          {
+              description: 'JPEG Image',
+              accept: { 'image/jpeg': ['.jpeg', '.jpg'] },
+          },
+          {
+              description: 'WEBP Image',
+              accept: { 'image/webp': ['.webp'] },
+          }
+        ],
+      });
+
+      const extension = fileHandle.name.split('.').pop().toLowerCase();
+      const mimeType = {
+        png: 'image/png',
+        jpeg: 'image/jpeg',
+        jpg: 'image/jpeg',
+        webp: 'image/webp',
+      }[extension] || 'image/png';
+
+      if (mimeType === 'image/jpeg') {
+        const tmpCanvas = document.createElement('canvas');
+        tmpCanvas.width = canvas.width;
+        tmpCanvas.height = canvas.height;
+        const tmpCtx = tmpCanvas.getContext('2d');
+
+        tmpCtx.fillStyle = 'white';
+        tmpCtx.fillRect(0, 0, tmpCanvas.width, tmpCanvas.height);
+
+        tmpCtx.drawImage(canvas, 0, 0);
+
+        const blob = await new Promise(resolve => tmpCanvas.toBlob(resolve, mimeType));
+        await guardarBlob(blob, fileHandle);
+      } else {
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, mimeType));
+        await guardarBlob(blob, fileHandle);
+      }
+    } catch (error) {
+        console.log('Something went wrong!')
+    }
+  } else {
+    const image = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.href = image;
+    link.download = 'myImage.png';
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+  
+}
+
+async function guardarBlob(blob, fileHandle) {
+  const writableStream = await fileHandle.createWritable();
+  await writableStream.write(blob);
+  await writableStream.close();
+}
 
 
 function initializeCanvas() {
