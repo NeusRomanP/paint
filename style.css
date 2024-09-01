@@ -113,6 +113,10 @@ aside button.active {
   background-image: url(./icons/picker.png);
 }
 
+#fill {
+  background-image: url(./icons/fill.png);
+}
+
 .trash {
   background-image: url(./icons/trash.png);
 }

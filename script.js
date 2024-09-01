@@ -6,7 +6,8 @@ const TOOLS = {
   ERASE: 'erase',
   RECTANGLE: 'rectangle',
   ELLIPSE: 'ellipse',
-  PICKER: 'picker'
+  PICKER: 'picker',
+  FILL: 'fill'
 };
 
 const colors = [];
@@ -20,6 +21,7 @@ const eraseButton = $('#erase');
 const rectangleButton = $('#rectangle');
 const ellipseButton = $('#ellipse');
 const pickerButton = $('#picker');
+const fillButton = $('#fill');
 const trashButton = $('#trash');
 
 const ccTrashButton = $('#custom-colors-trash');
@@ -34,6 +36,7 @@ let isDrawing = false;
 let isShiftPressed = false;
 let pickingColor = false;
 
+let currentColor = '#000000';
 let selectedCustomColor = null;
 let selectedCustomColorIndex = -1;
 
@@ -63,6 +66,7 @@ eraseButton.addEventListener('click', (e) => setTool(e, TOOLS.ERASE));
 rectangleButton.addEventListener('click', (e) => setTool(e, TOOLS.RECTANGLE));
 ellipseButton.addEventListener('click', (e) => setTool(e, TOOLS.ELLIPSE));
 pickerButton.addEventListener('click', (e) => setTool(e, TOOLS.PICKER));
+fillButton.addEventListener('click', (e) => setTool(e, TOOLS.FILL));
 trashButton.addEventListener('click', clearCanvas);
 ccTrashButton.addEventListener('click', removeSelectedColor);
 
@@ -165,6 +169,10 @@ function handleShiftKeyup({ key }) {
 function setTool (e, newTool) {
   tool = newTool;
   pickingColor = false;
+
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+
   $('button.active')?.classList.remove('active');
 
   if (tool === TOOLS.DRAW) {
@@ -205,6 +213,12 @@ function setTool (e, newTool) {
     pickingColor = true
     return
   }
+
+  if (tool === TOOLS.FILL) {
+    fillButton.classList.add('active');
+    canvas.style.cursor = 'url("./icons/fill.png") 0 24, auto';
+    return
+  }
 }
 
 canvas.addEventListener('click', (e) => {
@@ -238,21 +252,22 @@ function updateCustomColors() {
 
 function getCoords(e) {
   if (e.touches) {
-      return {
-          offsetX: e.touches[0].clientX - canvas.getBoundingClientRect().left,
-          offsetY: e.touches[0].clientY - canvas.getBoundingClientRect().top
-      };
+    return {
+      offsetX: e.touches[0].clientX - canvas.getBoundingClientRect().left,
+      offsetY: e.touches[0].clientY - canvas.getBoundingClientRect().top
+    };
   } else {
-      return {
-          offsetX: e.clientX - canvas.getBoundingClientRect().left,
-          offsetY: e.clientY - canvas.getBoundingClientRect().top
-      };
+    return {
+      offsetX: e.clientX - canvas.getBoundingClientRect().left,
+      offsetY: e.clientY - canvas.getBoundingClientRect().top
+    };
   }
 }
 
 
 function changeColor() {
   const { value } = colorPicker;
+  currentColor = value;
   ctx.strokeStyle = value;
 }
 
@@ -333,11 +348,17 @@ function draw (e) {
     ctx.stroke();
     return
   }
-  
 }
 
-function rgbToHex(r, g, b) {
-  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
+function rgbToHex(r, g, b, a = 255) {
+  const alpha = Math.round(a);
+  
+  const rHex = r.toString(16).padStart(2, '0').toUpperCase();
+  const gHex = g.toString(16).padStart(2, '0').toUpperCase();
+  const bHex = b.toString(16).padStart(2, '0').toUpperCase();
+  const aHex = alpha.toString(16).padStart(2, '0').toUpperCase();
+
+  return `#${rHex}${gHex}${bHex}${aHex}`;
 }
 
 function pickColor(e) {
@@ -347,10 +368,10 @@ function pickColor(e) {
   const [r, g, b, a] = imageData.data;
 
   if (a === 0) {
-      return '#ffffff';
+    return '#ffffff';
   }
 
-  return hexColor = rgbToHex(r, g, b);
+  return hexColor = rgbToHex(r, g, b, a);
 }
 
 function stopDrawing () {
@@ -432,6 +453,69 @@ async function guardarBlob(blob, fileHandle) {
   await writableStream.write(blob);
   await writableStream.close();
 }
+
+/* FILL COLOR */
+function getPixelColor(x, y) {
+  const imageData = ctx.getImageData(x, y, 1, 1);
+  const data = imageData.data;
+
+  // return [data[0], data[1], data[2], data[3]];
+  return rgbToHex(data[0], data[1], data[2], data[3]);
+}
+
+function colorsMatch(color1, color2) {
+  // console.log(color1, color2, 'match')
+  return color1.toLowerCase() === color2.toLowerCase();
+}
+
+function floodFill(x, y) {
+  const targetColor = getPixelColor(x, y);
+
+  if (colorsMatch(targetColor, currentColor)) return;
+
+  const stack = [[x, y]];
+
+  ctx.fillStyle = currentColor;
+
+  while (stack.length) {
+    let [currentX, currentY] = stack.pop();
+
+    currentX = Math.floor(currentX);
+    currentY = Math.floor(currentY);
+
+    if (currentX < 0 || currentX >= canvas.width || currentY < 0 || currentY >= canvas.height) continue;
+
+    const currentColor = getPixelColor(currentX, currentY);
+
+    if (colorsMatch(currentColor, targetColor)) {
+      ctx.fillRect(currentX, currentY, 1, 1);
+      stack.push([currentX + 1, currentY]);
+      stack.push([currentX - 1, currentY]);
+      stack.push([currentX, currentY + 1]);
+      stack.push([currentX, currentY - 1]);
+    } else{
+      ctx.fillRect(currentX, currentY, 1, 1);
+    }
+  }
+}
+
+function parseColor(color) {
+  const ctx = document.createElement('canvas').getContext('2d');
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, 1, 1);
+  const data = ctx.getImageData(0, 0, 1, 1).data;
+  return [data[0], data[1], data[2], data[3]];
+}
+
+canvas.addEventListener('click', (e) => {
+  if (tool === TOOLS.FILL) {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    floodFill(x, y);
+  }
+});
 
 ctx.lineJoin = 'round';
 ctx.lineCap = 'round';
