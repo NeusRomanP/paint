@@ -222,8 +222,10 @@ canvas.addEventListener('touch', (e) => {
 })
 
 function addCustomColor(color) {
-  colors.push(color);
-  updateCustomColors();
+  if (!colors.includes(color.toLowerCase())) {
+    colors.push(color.toLowerCase());
+    updateCustomColors();
+  }
 }
 
 function updateCustomColors() {
