@@ -160,7 +160,7 @@ function initializeCanvas() {
 function clearCanvas() {
   lastImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
   undoButton.classList.remove('disabled');
-  
+
   ctx.clearRect(0, 0, canvas.width, canvas.height)
 }
 
@@ -285,7 +285,9 @@ function startDrawing(e) {
 
   const { offsetX, offsetY } = getCoords(e);
 
-  lastImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  if (tool !== TOOLS.PICKER) {
+    lastImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  }
 
   startX = offsetX;
   startY = offsetY;
@@ -382,7 +384,9 @@ function pickColor(e) {
 function stopDrawing () {
   if (isDrawing) {
     isDrawing = false;
-    undoButton.classList.remove('disabled');
+    if (tool !== TOOLS.PICKER) {
+      undoButton.classList.remove('disabled');
+    }
   }
 }
 
