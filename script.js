@@ -37,6 +37,7 @@ let isShiftPressed = false;
 let pickingColor = false;
 
 let currentColor = '#000000';
+let currentColorRGB = parseColor(currentColor);
 let selectedCustomColor = null;
 let selectedCustomColorIndex = -1;
 
@@ -252,15 +253,15 @@ function updateCustomColors() {
 
 function getCoords(e) {
   if (e.touches) {
-    return {
-      offsetX: e.touches[0].clientX - canvas.getBoundingClientRect().left,
-      offsetY: e.touches[0].clientY - canvas.getBoundingClientRect().top
-    };
+      return {
+          offsetX: e.touches[0].clientX - canvas.getBoundingClientRect().left,
+          offsetY: e.touches[0].clientY - canvas.getBoundingClientRect().top
+      };
   } else {
-    return {
-      offsetX: e.clientX - canvas.getBoundingClientRect().left,
-      offsetY: e.clientY - canvas.getBoundingClientRect().top
-    };
+      return {
+          offsetX: e.clientX - canvas.getBoundingClientRect().left,
+          offsetY: e.clientY - canvas.getBoundingClientRect().top
+      };
   }
 }
 
@@ -268,6 +269,7 @@ function getCoords(e) {
 function changeColor() {
   const { value } = colorPicker;
   currentColor = value;
+  currentColorRGB = parseColor(currentColor);
   ctx.strokeStyle = value;
 }
 
@@ -348,17 +350,11 @@ function draw (e) {
     ctx.stroke();
     return
   }
+  
 }
 
-function rgbToHex(r, g, b, a = 255) {
-  const alpha = Math.round(a);
-  
-  const rHex = r.toString(16).padStart(2, '0').toUpperCase();
-  const gHex = g.toString(16).padStart(2, '0').toUpperCase();
-  const bHex = b.toString(16).padStart(2, '0').toUpperCase();
-  const aHex = alpha.toString(16).padStart(2, '0').toUpperCase();
-
-  return `#${rHex}${gHex}${bHex}${aHex}`;
+function rgbToHex(r, g, b) {
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
 }
 
 function pickColor(e) {
@@ -368,10 +364,10 @@ function pickColor(e) {
   const [r, g, b, a] = imageData.data;
 
   if (a === 0) {
-    return '#ffffff';
+      return '#ffffff';
   }
 
-  return hexColor = rgbToHex(r, g, b, a);
+  return hexColor = rgbToHex(r, g, b);
 }
 
 function stopDrawing () {
@@ -458,45 +454,58 @@ async function guardarBlob(blob, fileHandle) {
 function getPixelColor(x, y) {
   const imageData = ctx.getImageData(x, y, 1, 1);
   const data = imageData.data;
-
-  // return [data[0], data[1], data[2], data[3]];
-  return rgbToHex(data[0], data[1], data[2], data[3]);
+  return [data[0], data[1], data[2], data[3]];
 }
 
 function colorsMatch(color1, color2) {
-  // console.log(color1, color2, 'match')
-  return color1.toLowerCase() === color2.toLowerCase();
+  return color1[0] === color2[0] &&
+         color1[1] === color2[1] &&
+         color1[2] === color2[2] &&
+         color1[3] === color2[3];
 }
 
 function floodFill(x, y) {
-  const targetColor = getPixelColor(x, y);
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imageData.data;
 
+  const targetColor = getPixel(x, y);
   if (colorsMatch(targetColor, currentColor)) return;
 
   const stack = [[x, y]];
 
-  ctx.fillStyle = currentColor;
+  function setPixel(x, y, color) {
+    const index = (y * canvas.width + x) * 4;
+    data[index] = color[0];
+    data[index + 1] = color[1];
+    data[index + 2] = color[2];
+    data[index + 3] = 255;
+  }
+
+  function getPixel(x, y) {
+    const index = (y * canvas.width + x) * 4;
+    return [data[index], data[index + 1], data[index + 2], data[index + 3]];
+  }
 
   while (stack.length) {
     let [currentX, currentY] = stack.pop();
 
-    currentX = Math.floor(currentX);
-    currentY = Math.floor(currentY);
-
     if (currentX < 0 || currentX >= canvas.width || currentY < 0 || currentY >= canvas.height) continue;
 
-    const currentColor = getPixelColor(currentX, currentY);
+    const currentPixelColor = getPixel(currentX, currentY);
 
-    if (colorsMatch(currentColor, targetColor)) {
-      ctx.fillRect(currentX, currentY, 1, 1);
+    if (colorsMatch(currentPixelColor, targetColor)) {
+      setPixel(currentX, currentY, currentColorRGB);
+
       stack.push([currentX + 1, currentY]);
       stack.push([currentX - 1, currentY]);
       stack.push([currentX, currentY + 1]);
       stack.push([currentX, currentY - 1]);
-    } else{
-      ctx.fillRect(currentX, currentY, 1, 1);
+    }else {
+      setPixel(currentX, currentY, currentColorRGB);
     }
   }
+
+  ctx.putImageData(imageData, 0, 0);
 }
 
 function parseColor(color) {
@@ -510,8 +519,8 @@ function parseColor(color) {
 canvas.addEventListener('click', (e) => {
   if (tool === TOOLS.FILL) {
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const x = Math.floor(e.clientX - rect.left);
+    const y = Math.floor(e.clientY - rect.top);
 
     floodFill(x, y);
   }
