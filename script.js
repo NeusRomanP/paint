@@ -22,6 +22,7 @@ const rectangleButton = $('#rectangle');
 const ellipseButton = $('#ellipse');
 const pickerButton = $('#picker');
 const fillButton = $('#fill');
+const undoButton = $('#undo');
 const trashButton = $('#trash');
 
 const ccTrashButton = $('#custom-colors-trash');
@@ -35,6 +36,8 @@ const dropdownMenuItems = $$('nav li.dropdown');
 let isDrawing = false;
 let isShiftPressed = false;
 let pickingColor = false;
+
+let lastImage = null;
 
 let currentColor = '#000000';
 let currentColorRGB = parseColor(currentColor);
@@ -68,6 +71,7 @@ rectangleButton.addEventListener('click', (e) => setTool(e, TOOLS.RECTANGLE));
 ellipseButton.addEventListener('click', (e) => setTool(e, TOOLS.ELLIPSE));
 pickerButton.addEventListener('click', (e) => setTool(e, TOOLS.PICKER));
 fillButton.addEventListener('click', (e) => setTool(e, TOOLS.FILL));
+undoButton.addEventListener('click', undoMove);
 trashButton.addEventListener('click', clearCanvas);
 ccTrashButton.addEventListener('click', removeSelectedColor);
 
@@ -154,6 +158,9 @@ function initializeCanvas() {
 }
 
 function clearCanvas() {
+  lastImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  undoButton.classList.remove('disabled');
+  
   ctx.clearRect(0, 0, canvas.width, canvas.height)
 }
 
@@ -278,6 +285,8 @@ function startDrawing(e) {
 
   const { offsetX, offsetY } = getCoords(e);
 
+  lastImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
   startX = offsetX;
   startY = offsetY;
   lastX = offsetX;
@@ -373,6 +382,7 @@ function pickColor(e) {
 function stopDrawing () {
   if (isDrawing) {
     isDrawing = false;
+    undoButton.classList.remove('disabled');
   }
 }
 
@@ -525,6 +535,15 @@ canvas.addEventListener('click', (e) => {
     floodFill(x, y);
   }
 });
+
+function undoMove() {
+  if (lastImage) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    ctx.putImageData(lastImage, 0, 0);
+    undoButton.classList.add('disabled');
+    lastImage = null;
+  }
+}
 
 ctx.lineJoin = 'round';
 ctx.lineCap = 'round';

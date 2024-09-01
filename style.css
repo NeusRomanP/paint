@@ -93,6 +93,13 @@ aside button.active {
   border-bottom-color: #eee;
 }
 
+aside button.disabled {
+  background-color: #888;
+  border-color: #000;
+  border-right-color: #eee;
+  border-bottom-color: #eee;
+}
+
 #draw {
   background-image: url(./icons/draw.png);
 }
@@ -115,6 +122,10 @@ aside button.active {
 
 #fill {
   background-image: url(./icons/fill.png);
+}
+
+#undo {
+  background-image: url(./icons/undo.png);
 }
 
 .trash {
