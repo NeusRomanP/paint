@@ -38,6 +38,7 @@ let isShiftPressed = false;
 let pickingColor = false;
 
 let lastImage = null;
+let lastIsTrash = false;
 
 let currentColor = '#000000';
 let currentColorRGB = parseColor(currentColor);
@@ -158,10 +159,12 @@ function initializeCanvas() {
 }
 
 function clearCanvas() {
-  lastImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  undoButton.classList.remove('disabled');
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  if (!lastIsTrash) {
+    lastImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    undoButton.classList.remove('disabled');
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+  }
+  lastIsTrash = true;
 }
 
 initializeCanvas();
@@ -301,6 +304,8 @@ function startDrawing(e) {
 
 function draw (e) {
   if (!isDrawing) return;
+
+  lastIsTrash = false;
 
   const { offsetX, offsetY } = getCoords(e);
 
@@ -546,6 +551,7 @@ function undoMove() {
     ctx.putImageData(lastImage, 0, 0);
     undoButton.classList.add('disabled');
     lastImage = null;
+    lastIsTrash = false;
   }
 }
 
