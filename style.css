@@ -149,12 +149,20 @@ footer{
   background-color: #AAA;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
   padding-block: 2px;
 }
 
+footer .footer-colors {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 footer .color-picker {
   display: flex;
+  padding: 4px;
   align-items: center;
 }
 
@@ -188,4 +196,43 @@ footer button.trash {
   border: 1.5px solid #eee;
   border-right-color: #000;
   border-bottom-color: #000;
+}
+
+footer .footer-tool-size {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+}
+
+footer .footer-tool-size #tool-size {
+  width: 2rem;
+  text-align: center;
+}
+
+footer .footer-tool-size button {
+  width: 24px;
+  height: 24px;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+footer .footer-tool-size button {
+  width: 24px;
+  height: 24px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-color: #AAA;
+  border: 1.5px solid #eee;
+  border-right-color: #000;
+  border-bottom-color: #000;
+}
+
+footer .footer-tool-size button.disabled {
+  background-color: #888;
+  border-color: #000;
+  border-right-color: #eee;
+  border-bottom-color: #eee;
 }

@@ -10,6 +10,8 @@ const TOOLS = {
   FILL: 'fill'
 };
 
+const maxLW = 48;
+
 const colors = [];
 
 const canvas = $('canvas');
@@ -26,6 +28,11 @@ const undoButton = $('#undo');
 const trashButton = $('#trash');
 
 const ccTrashButton = $('#custom-colors-trash');
+
+const increaseButton = $('#increase');
+const decreaseButton = $('#decrease');
+
+const toolSizeElement = $('#tool-size');
 
 const saveButton = $('#save');
 
@@ -53,6 +60,10 @@ let lastY = 0;
 let drawLW = 2;
 let eraseLW = 20;
 
+toolSizeElement.innerHTML = drawLW;
+
+increaseButton.addEventListener('click', () => increaseToolSize())
+decreaseButton.addEventListener('click', () => decreaseToolSize())
 
 canvas.addEventListener('mousedown', startDrawing);
 canvas.addEventListener('mousemove', draw);
@@ -185,6 +196,9 @@ function setTool (e, newTool) {
   ctx.lineCap = 'round';
 
   $('button.active')?.classList.remove('active');
+  toolSizeElement.innerHTML = drawLW;
+  checkIncreaseButton(drawLW);
+  checkDecreaseButton(drawLW);
 
   if (tool === TOOLS.DRAW) {
     drawButton.classList.add('active');
@@ -199,6 +213,9 @@ function setTool (e, newTool) {
     canvas.style.cursor = 'url("./cursors/erase.png") 0 24, auto';
     ctx.globalCompositeOperation = 'destination-out';
     ctx.lineWidth = eraseLW;
+    toolSizeElement.innerHTML = eraseLW;
+    checkIncreaseButton(eraseLW);
+    checkDecreaseButton(eraseLW);
     return
   }
 
@@ -552,6 +569,68 @@ function undoMove() {
     undoButton.classList.add('disabled');
     lastImage = null;
     lastIsTrash = false;
+  }
+}
+
+function increaseToolSize() {
+  if(tool === TOOLS.ERASE) {
+    if (eraseLW < maxLW) {
+      eraseLW++;
+      toolSizeElement.innerHTML = eraseLW;
+      ctx.lineWidth = eraseLW;
+    }
+
+    checkIncreaseButton(eraseLW);
+    checkDecreaseButton(eraseLW);
+  } else {
+    if (drawLW < maxLW) {
+      drawLW++;
+      toolSizeElement.innerHTML = drawLW;
+      ctx.lineWidth = drawLW;
+    }
+
+    checkIncreaseButton(drawLW);
+    checkDecreaseButton(drawLW);
+  }
+
+}
+
+function decreaseToolSize() {
+  if(tool === TOOLS.ERASE) {
+    if (eraseLW > 1) {
+      eraseLW--;
+      toolSizeElement.innerHTML = eraseLW;
+      ctx.lineWidth = eraseLW;
+    }
+
+    checkIncreaseButton(eraseLW);
+    checkDecreaseButton(eraseLW);
+
+  } else {
+    if (drawLW > 1) {
+      drawLW--;
+      toolSizeElement.innerHTML = drawLW;
+      ctx.lineWidth = drawLW;
+    }
+
+    checkIncreaseButton(drawLW);
+    checkDecreaseButton(drawLW);
+  }
+}
+
+function checkIncreaseButton(lineWidth) {
+  if (lineWidth >= maxLW) {
+    increaseButton.classList.add('disabled');
+  } else {
+    increaseButton.classList.remove('disabled');
+  }
+}
+
+function checkDecreaseButton(lineWidth) {
+  if (lineWidth <= 1) {
+    decreaseButton.classList.add('disabled');
+  } else {
+    decreaseButton.classList.remove('disabled');
   }
 }
 
