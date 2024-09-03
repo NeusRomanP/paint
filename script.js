@@ -536,8 +536,6 @@ function floodFill(x, y) {
       stack.push([currentX - 1, currentY]);
       stack.push([currentX, currentY + 1]);
       stack.push([currentX, currentY - 1]);
-    }else {
-      setPixel(currentX, currentY, currentColorRGB);
     }
   }
 
