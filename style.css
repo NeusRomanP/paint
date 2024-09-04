@@ -1,8 +1,49 @@
 body {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
   font-family: Arial, Helvetica, sans-serif;
   margin: 0;
   background-color: #333;
   box-sizing: border-box;
+}
+
+body > header {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  color: white;
+}
+
+body > header h1 {
+  max-width: 600px;
+  width: 90%;
+  text-align: center;
+}
+
+body > main {
+  display: flex;
+  flex: 1;
+  align-items: flex-start;
+}
+
+body > footer {
+  display: flex;
+  justify-content: center;
+  color: white;
+  background-color: transparent;
+}
+
+body > footer > span {
+  max-width: 90%;
+  text-align: center;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+body > footer > span > span {
+  width: 100%;
+  padding-block: 4px;
 }
 
 #container {
@@ -12,7 +53,6 @@ body {
   max-width: 600px;
   aspect-ratio: 16/9;
   background-color: #111;
-  margin: auto;
 }
 
 nav ul {

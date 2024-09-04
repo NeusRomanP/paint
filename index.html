@@ -3,69 +3,78 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>NeRoPi - Paint</title>
+  <link rel="icon" type="image/png" href="./icon.png">
   <link rel="stylesheet" href="style.css">
   <script src="script.js" defer></script>
 </head>
 <body>
-  <div id="container">
-    <nav>
-      <ul>
-        <li class="dropdown">
-          File
-          <ul>
-            <li id="save">Save</li>
-          </ul>
-        </li>
-        <li>Edit</li>
-        <li>View</li>
-        <li>Image</li>
-        <li>Options</li>
-        <li>Help</li>
-      </ul>
-    </nav>
-    <div class="main-container">
-      <aside>
-        <div>
-          <button id="draw" class="active"></button>
-          <button id="erase"></button>
-          <button id="rectangle"></button>
-          <button id="ellipse"></button>
-          <button id="picker"></button>
-          <button id="fill"></button>
-          <button id="undo" class="disabled"></button>
-          <button id="trash" class="trash"></button>
-        </div>
-      </aside>
-      <main>
-        <canvas></canvas>
-      </main>
-    </div>
-    <footer>
-      <div class="footer-colors">
-        <div class="color-picker">
-          <input type="color" name="color" id="color">
-        </div>
-        <ul class="custom-colors">
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
+  <header>
+    <h1>NeRoPi - Paint</h1>
+  </header>
+  <main>
+    <div id="container">
+      <nav>
+        <ul>
+          <li class="dropdown">
+            File
+            <ul>
+              <li id="save">Save</li>
+            </ul>
+          </li>
+          <li>Edit</li>
+          <li>View</li>
+          <li>Image</li>
+          <li>Options</li>
+          <li>Help</li>
         </ul>
-        <button class="trash" id="custom-colors-trash"></button>
+      </nav>
+      <div class="main-container">
+        <aside>
+          <div>
+            <button id="draw" class="active"></button>
+            <button id="erase"></button>
+            <button id="rectangle"></button>
+            <button id="ellipse"></button>
+            <button id="picker"></button>
+            <button id="fill"></button>
+            <button id="undo" class="disabled"></button>
+            <button id="trash" class="trash"></button>
+          </div>
+        </aside>
+        <main>
+          <canvas></canvas>
+        </main>
       </div>
-      <div class="footer-tool-size">
-        <button id="decrease"><span>-</span></button>
-        <span id="tool-size"></span>
-        <button id="increase"><span>+</span></button>
-      </div>
-    </footer>
-  </div>
+      <footer>
+        <div class="footer-colors">
+          <div class="color-picker">
+            <input type="color" name="color" id="color">
+          </div>
+          <ul class="custom-colors">
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+          </ul>
+          <button class="trash" id="custom-colors-trash"></button>
+        </div>
+        <div class="footer-tool-size">
+          <button id="decrease"><span>-</span></button>
+          <span id="tool-size"></span>
+          <button id="increase"><span>+</span></button>
+        </div>
+      </footer>
+    </div>
+  </main>
+  <footer>
+    <span><span>Project inspired by <strong>Midudev</strong>.</span><span>By <strong>Neus Roman</strong>.</span> </span>
+  </footer>
 </body>
 </html>
